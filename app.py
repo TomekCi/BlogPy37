@@ -60,7 +60,7 @@ def edit(id):
         return render_template('edit.html', post=post)
 
 
-@app.route('/posts/new', methods=['GET','POST'])
+@app.route('/posts/new', methods=['GET', 'POST'])
 def new_posts():
     if request.method == 'POST':
         post_title = request.form['title']
