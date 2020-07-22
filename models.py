@@ -8,8 +8,8 @@ class BaseModel(db.Model):
     """Base data model for all objects"""
     __abstract__ = True
 
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def __repr__(self):
         # Define a base way to print models
@@ -24,6 +24,24 @@ class BaseModel(db.Model):
             column: value if not isinstance(value, datetime.date) else value.strftime('%Y-%m-%d')
             for column, value in self._to_dict().items()
         }"""
+
+
+class Posts(BaseModel, db.Model):
+    __tablename__ = 'posts'
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    title = db.Column(db.String(100), nullable=False)
+    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    content = db.Column(db.Text, nullable=True)
+
+    author = db.Column(db.String(20), nullable=True, default='N/A')
+    #authorP_id = db.Column(db.Integer, db.ForeignKey('author.id'))
+    #authorP = db.relationship("author", back_populates="posts")
+
+    #comments = db.relationship("comments", back_populates="posts")
+
+    #def __repr__(self):
+    #    return 'Blog post' + str(self.id)
 
 
 """
@@ -63,22 +81,6 @@ class Author(BaseModel, db.Model):
 """
 
 
-class Posts(BaseModel, db.Model):
-    __tablename__ = 'posts'
-
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
-    title = db.Column(db.String(100), nullable=False)
-    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    content = db.Column(db.Text, nullable=True)
-
-    author = db.Column(db.String(20), nullable=True, default='N/A')
-    #authorP_id = db.Column(db.Integer, db.ForeignKey('author.id'))
-    #authorP = db.relationship("author", back_populates="posts")
-
-    #comments = db.relationship("comments", back_populates="posts")
-
-    #def __repr__(self):
-    #    return 'Blog post' + str(self.id)
 """
 class Comments(BaseModel, db.Model):
     __tablename__ = 'comments'
