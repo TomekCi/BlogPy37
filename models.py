@@ -26,22 +26,28 @@ class BaseModel(db.Model):
         }"""
 
 
-class Posts(BaseModel, db.Model):
-    __tablename__ = 'posts'
+class User(BaseModel, db.Model):
+    __tablename__ = 'user'
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    name = db.Column(db.String(20), nullable=False)
+    surname = db.Column(db.String(30), nullable=False)
+    emailAddress = db.Column(db.String(40), unique=True, nullable=False)
+    userName = db.Column(db.String(20), nullable=False)
+    passwordHash = db.Column(db.String(30), nullable=False)
+
+    posts = db.relationship('Post', backref='author', lazy='dynamic')
+
+
+class Post(BaseModel, db.Model):
+    __tablename__ = 'post'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     title = db.Column(db.String(100), nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     content = db.Column(db.Text, nullable=True)
 
-    author = db.Column(db.String(20), nullable=True, default='N/A')
-    #authorP_id = db.Column(db.Integer, db.ForeignKey('author.id'))
-    #authorP = db.relationship("author", back_populates="posts")
-
-    #comments = db.relationship("comments", back_populates="posts")
-
-    #def __repr__(self):
-    #    return 'Blog post' + str(self.id)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
 """
@@ -50,23 +56,6 @@ python manage.py db init
                     upgrade 
 """
 
-"""
-class Users(BaseModel, db.Model):
-    __tablename__ = 'users'
-
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
-    name = db.Column(db.String(20), nullable=False)
-    surname = db.Column(db.String(30), nullable=False)
-    emailAddress = db.Column(db.String(40), unique=True, nullable=False)
-    userName = db.Column(db.String(20), nullable=False)
-    passwordSalt = db.Column(db.String(30), nullable=False)
-    passwordHash = db.Column(db.String(30), nullable=False)
-
-    author_id = db.Column(db.Integer, db.ForeignKey('author.id'))
-    author = db.relationship("Author", back_populates="users")
-
-    children = db.relationship("Comments", back_populates="users")
-"""
 
 """
 class Author(BaseModel, db.Model):

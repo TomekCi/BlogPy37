@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect
-from models import db, Posts
+from models import db, Post, User
 
 app = Flask(__name__)
 
@@ -28,18 +28,18 @@ def posts():
         post_title = request.form['title']
         post_content = request.form['content']
         post_author = request.form['author']
-        new_post = Posts(title = post_title, content = post_content, author = post_author)
+        new_post = Post(title=post_title, content=post_content, author=post_author)
         db.session.add(new_post)
         db.session.commit()
         return redirect('/posts')
     elif request.method == 'GET':
-        all_posts = Posts.query.order_by(Posts.date_posted).all()
+        all_posts = Post.query.order_by(Post.date_posted).all()
         return render_template('posts.html', posts=all_posts)
 
 
 @app.route('/posts/delete/<int:id>')
 def delete(id):
-    post = Posts.query.get_or_404(id)
+    post = Post.query.get_or_404(id)
     db.session.delete(post)
     db.session.commit()
     return redirect('/posts')
@@ -48,7 +48,7 @@ def delete(id):
 @app.route('/posts/edit/<int:id>', methods=['GET', 'POST'])
 def edit(id):
 
-    post = Posts.query.get_or_404(id)
+    post = Post.query.get_or_404(id)
 
     if request.method == 'POST':
         post.title = request.form['title']
@@ -66,12 +66,12 @@ def new_posts():
         post_title = request.form['title']
         post_content = request.form['content']
         post_author = request.form['author']
-        new_post = Posts(title = post_title, content = post_content, author = post_author)
+        new_post = Post(title = post_title, content = post_content, author = post_author)
         db.session.add(new_post)
         db.session.commit()
         return redirect('/posts')
     elif request.method == 'GET':
-        all_posts = Posts.query.order_by(Posts.date_posted).all()
+        all_posts = Post.query.order_by(Post.date_posted).all()
         return render_template('new_post.html', posts=all_posts)
 
 
