@@ -1,0 +1,16 @@
+proby dodania do bazy uzytkownika:
+
+1. from app import db
+2. from models import User, Post
+
+3. u = User(name="Tom",surname="Ci",emailAddress="TomCi@pl.pl",userName="TomCi")
+4. u.set_password("dupa1")
+Traceback (most recent call last):
+  File "<input>", line 1, in <module>
+AttributeError: 'User' object has no attribute 'set_password'
+
+przy dodawaniu hasla wystepuje powyzszy blad.
+
+
+5. db.session.add(u)
+6. db.session.commit()
