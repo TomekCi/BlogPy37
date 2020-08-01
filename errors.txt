@@ -1,16 +1,30 @@
 proby dodania do bazy uzytkownika:
 
-1. from app import db
-2. from models import User, Post
+1. from models import db, User, Post
 
-3. u = User(name="Tom",surname="Ci",emailAddress="TomCi@pl.pl",userName="TomCi")
-4. u.set_password("dupa1")
+2. u = User(name="Tom",surname="Ci",emailAddress="TomCi@pl.pl",userName="TomCi")
+3. u.set_password("dupa1")
+4. db.session.add(u)
+"
+Traceback (most recent call last):
+  File "C:\Pycharm\Blog37venv\lib\site-packages\sqlalchemy\util\_collections.py", line 1020, in __call__
+    return self.registry[key]
+KeyError: 17704
+During handling of the above exception, another exception occurred:
 Traceback (most recent call last):
   File "<input>", line 1, in <module>
-AttributeError: 'User' object has no attribute 'set_password'
+  File "C:\Pycharm\Blog37venv\lib\site-packages\sqlalchemy\orm\scoping.py", line 163, in do
+    return getattr(self.registry(), name)(*args, **kwargs)
+  File "C:\Pycharm\Blog37venv\lib\site-packages\sqlalchemy\util\_collections.py", line 1022, in __call__
+    return self.registry.setdefault(key, self.createfunc())
+  File "C:\Pycharm\Blog37venv\lib\site-packages\sqlalchemy\orm\session.py", line 3286, in __call__
+    return self.class_(**local_kw)
+  File "C:\Pycharm\Blog37venv\lib\site-packages\flask_sqlalchemy\__init__.py", line 136, in __init__
+    self.app = app = db.get_app()
+  File "C:\Pycharm\Blog37venv\lib\site-packages\flask_sqlalchemy\__init__.py", line 988, in get_app
+    'No application found. Either work inside a view function or push'
+RuntimeError: No application found. Either work inside a view function or push an application context. See http://flask-sqlalchemy.pocoo.org/contexts/.
+"
 
-przy dodawaniu hasla wystepuje powyzszy blad.
 
-
-5. db.session.add(u)
-6. db.session.commit()
+5. db.session.commit()
