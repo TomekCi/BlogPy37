@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
 db = SQLAlchemy()
 
 
@@ -31,19 +32,11 @@ class User(BaseModel, db.Model):
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    name = db.Column(db.String(20), nullable=False)
-    surname = db.Column(db.String(30), nullable=False)
-    emailAddress = db.Column(db.String(40), unique=True, nullable=False)
-    userName = db.Column(db.String(20), nullable=False)
-    passwordHash = db.Column(db.String(30), nullable=False)
+    username = db.Column(db.String(20), nullable=False)
+    password = db.Column(db.String(30), nullable=False)
 
-    posts = db.relationship('Post', backref='author', lazy='dynamic')
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+    def __repr__(self):
+        return f'<User: {self.username}'
 
 
 class Post(BaseModel, db.Model):
@@ -63,6 +56,25 @@ python manage.py db init
                     upgrade 
 """
 
+"""
+class User(BaseModel, db.Model):
+    __tablename__ = 'user'
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    name = db.Column(db.String(20), nullable=False)
+    surname = db.Column(db.String(30), nullable=False)
+    emailAddress = db.Column(db.String(40), unique=True, nullable=False)
+    userName = db.Column(db.String(20), nullable=False)
+    passwordHash = db.Column(db.String(30), nullable=False)
+
+    posts = db.relationship('Post', backref='author', lazy='dynamic')
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+"""
 
 """
 class Author(BaseModel, db.Model):

@@ -1,7 +1,14 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
+from flask_login import LoginManager
 from models import db, Post, User
 
+users = []
+users.append(User(id=1, username='Tom', password='dupa1'))
+users.append(User(id=2, username='Gos', password='dupa2'))
+
 app = Flask(__name__)
+app.secret_key ='secretkey'
+
 
 POSTGRES = {
     'user': 'postgres',
@@ -15,6 +22,31 @@ app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
 %(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
 db.init_app(app)
+
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        session.pop('user_id', None)
+        username = request.form['username']
+        password = request.form['password']
+
+        try:
+            user = [x for x in users if x.username == username][0]
+        except Exception:
+            return redirect('/login')
+
+        if user and user.password == password:
+            session['user_id'] = user.id
+            return redirect('/profile')
+
+        return redirect('/login')
+
+    return render_template('login.html')
+
+@app.route("/profile")
+def profile():
+    return render_template('profile.html')
 
 
 @app.route("/")
