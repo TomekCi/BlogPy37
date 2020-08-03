@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, g
 from flask_login import LoginManager
 from models import db, Post, User
+
 
 users = []
 users.append(User(id=1, username='Tom', password='dupa1'))
@@ -24,6 +25,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
 db.init_app(app)
 
 
+@app.before_request
+def before_request():
+    if 'user_id' in session:
+        user = [x for x in users if x.id == session['user_id']][0]
+        g.user = user
+    else:
+        g.user = None
+
+
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -44,8 +54,12 @@ def login():
 
     return render_template('login.html')
 
+
 @app.route("/profile")
 def profile():
+    if not g.user:
+        return redirect('/login')
+
     return render_template('profile.html')
 
 
