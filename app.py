@@ -1,15 +1,13 @@
-from flask import Flask, render_template, request, redirect, session, g
+from flask import Flask, render_template, request, redirect, flash, url_for, session, logging
 from flask_login import LoginManager
 from models import db, Post, User
+from data import Articles
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 
-
-users = []
-users.append(User(id=1, username='Tom', password='dupa1'))
-users.append(User(id=2, username='Gos', password='dupa2'))
 
 app = Flask(__name__)
-app.secret_key ='secretkey'
 
+Articles = Articles()
 
 POSTGRES = {
     'user': 'postgres',
@@ -25,42 +23,40 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
 db.init_app(app)
 
 
-@app.before_request
-def before_request():
-    if 'user_id' in session:
-        user = [x for x in users if x.id == session['user_id']][0]
-        g.user = user
-    else:
-        g.user = None
+class RegisterForm(Form):
+    userName = StringField('userName', [validators.Length(min=5, max=30)])
+    email = StringField('emailAddress', [validators.Length(min=5, max=30)])
+    password = PasswordField('passwordHash', [
+        validators.Length(min=5, max=15),
+        validators.EqualTo('confirm', message='Passwords do not mach')
+    ])
+    confirm = PasswordField('Confirm Password')
 
 
-@app.route("/login", methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        session.pop('user_id', None)
-        username = request.form['username']
-        password = request.form['password']
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegisterForm(request.form)
+    if request.method == 'POST' and form.validate():
+        user = form.userName.data
+        email = form.email.data
+        password = form.password.data
+        # passwordHash = User.set_password(form.password.data)
 
-        try:
-            user = [x for x in users if x.username == username][0]
-        except Exception:
-            return redirect('/login')
-
-        if user and user.password == password:
-            session['user_id'] = user.id
-            return redirect('/profile')
-
-        return redirect('/login')
-
-    return render_template('login.html')
+        new_user = User(username=user, emailaddress=email, passwordhash=password)
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect('/register')
+    return render_template('register.html', form=form)
 
 
-@app.route("/profile")
-def profile():
-    if not g.user:
-        return redirect('/login')
+@app.route("/articles")
+def articles():
+    return render_template('articles.html', articles = Articles)
 
-    return render_template('profile.html')
+
+@app.route("/article/<int:id>")
+def article(id):
+    return render_template('article.html', id = id, article = article)
 
 
 @app.route("/")
@@ -112,7 +108,7 @@ def new_posts():
         post_title = request.form['title']
         post_content = request.form['content']
         post_author = request.form['author']
-        new_post = Post(title = post_title, content = post_content, author = post_author)
+        new_post = Post(title = post_title, content = post_content)
         db.session.add(new_post)
         db.session.commit()
         return redirect('/posts')
