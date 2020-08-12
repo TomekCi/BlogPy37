@@ -20,27 +20,15 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="/register">Register<span class="sr-only">(current)</span></a>
                 </li>
-
-
                 <li class="nav-item active">
-                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/posts">Posts</a>
+                    <a class="nav-link" href="/login">Login</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link disabled" href="/about">About</a>
                 </li>
-                {% if posts %}
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Edit</a>
-                    <div class="dropdown-menu" aria-labelledby="dropdown01">
-                        {% for post in posts %}
-                            <a class="dropdown-item" href=/posts/edit/{{post.id}}>{{post.title}}</a>
-                        {% endfor %}
-                    </div>
-                </li>
-                {% endif %}
             </ul>
         </div>
     </nav>
