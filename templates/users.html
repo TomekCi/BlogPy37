@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Users</title>
+{% endblock %}
+
+
+{% block body %}
+  <h1>Users</h1>
+  {% for user in users %}
+    <li>{{db_query_all_users.id}} {{db_query_all_users.username}} {{db_query_all_users.register_date}}</li>
+  {% endfor %}
+
+  {{ db_query_one_user.emailaddress }}
+
+{% endblock %}

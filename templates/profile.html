@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<title>Home</title>
+<title>Profile</title>
 {% endblock %}
 
 
@@ -9,8 +9,9 @@
 
     <div class="jumbotron">
       <div class="col-sm-8 mx-auto">
-        <p>Hello {{g.user.username}}</p>
-        <p>your id is {{g.user.id}}</p>
+        <p>Hello {{db_query_one_user.username}}</p>
+        <p>your id is {{db_query_one_user.id}}</p>
+        <p>your id is {{db_query_one_user.passwordhash}}</p>
       </div>
     </div>
 

@@ -14,13 +14,14 @@ class BaseModel(db.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    """
     def __repr__(self):
         # Define a base way to print models
         return '%s(%s)' % (self.__class__.__name__, {
             column: value
             for column, value in self._to_dict().items()
         })
-"""
+
     def json(self):
         # Define a base way to jsonify models, dealing with datetime objects
         return {
