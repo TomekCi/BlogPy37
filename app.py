@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, session, logging
 from flask_login import LoginManager
-from models import db, Post, User
+from flask_security import login_required, SQLAlchemyUserDatastore, Security
+from models import db, User, Role
 from data import Articles
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 
@@ -18,17 +19,37 @@ POSTGRES = {
 }
 
 app.config['DEBUG'] = True
+app.config['SECRET_KEY'] = 'secret'
+app.config['SECURITY_PASSWORD_SALT'] = 'secrethash'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
 %(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.debug = True
-login_manager = LoginManager()
+# login_manager = LoginManager()
 db.init_app(app)
-login_manager.init_app(app)
+# login_manager.init_app(app)
+
+
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+security = Security(app, user_datastore)
+
+
+# @app.before_first_request
+# def create_user():
+#    db.create_all()
+#    user_datastore.create_user(email='matt@nobien.net', password='password')
+#    db.session.commit()
+
+
+# Views
+# @app.route('/')
+# @login_required
+# def home():
+#    return render_template('index.html')
 
 
 class RegisterForm(Form):
-    username = StringField('User name', [validators.Length(min=5, max=30)])
+    # username = StringField('User name', [validators.Length(min=5, max=30)])
     email = StringField('E-mail address', [validators.Length(min=5, max=30)])
     password = PasswordField('Password', [
         validators.Length(min=5, max=15),
@@ -38,51 +59,54 @@ class RegisterForm(Form):
 
 
 class LoginForm(Form):
-    username = StringField('User name', [validators.Length(min=5, max=30)])
+    email = StringField('Email address', [validators.Length(min=5, max=30)])
     password = PasswordField('Password', [validators.Length(min=5, max=15)])
 
 
+'''
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+'''
 
 
-@app.route('/profile/<username>')
-def profile(username):
-    db_query_one_user = User.query.filter_by(username=username).first()
-
-    return render_template('/profile.html', db_query_one_user=db_query_one_user)
-
-
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login1', methods=['GET', 'POST'])
 def login():
     form = LoginForm(request.form)
     if request.method == 'POST' and form.validate():
-        user = form.username.data
+        email = form.email.data
         password = form.password.data
-        # passwordhash = User.check_password(form.password.data)
 
-        db_query_one_user = User.query.filter_by(username=user).first()
+        db_query_one_user = User.query.filter_by(email=email).first()
 
-        if db_query_one_user is not None and db_query_one_user.passwordhash == password:
-            return redirect('/profile/' + user)
+        print(db_query_one_user.id)
+        if db_query_one_user is not None and db_query_one_user.password == password:
+            return redirect('/profile/' + str(db_query_one_user.id))
 
     return render_template('/login.html', form=form)
+
+
+@login_required
+@app.route('/profile/<id>')
+def profile(id):
+    db_query_one_user = User.query.filter_by(id=id).first()
+
+    return render_template('/profile.html', db_query_one_user=db_query_one_user)
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm(request.form)
     if request.method == 'POST' and form.validate():
-        user = form.username.data
+        # user = form.username.data
         email = form.email.data
         password = form.password.data
         # passwordhash = User.set_password(form.password.data)
 
-        new_user = User(username=user, emailaddress=email, passwordhash=password)
+        new_user = User(email=email, password=password)
         db.session.add(new_user)
         db.session.commit()
-        return redirect('/register')
+        return redirect('/login')
     return render_template('register.html', form=form)
 
 

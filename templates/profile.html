@@ -9,9 +9,11 @@
 
     <div class="jumbotron">
       <div class="col-sm-8 mx-auto">
-        <p>Hello {{db_query_one_user.username}}</p>
+        <p>Hello {{db_query_one_user.email}}</p>
         <p>your id is {{db_query_one_user.id}}</p>
-        <p>your id is {{db_query_one_user.passwordhash}}</p>
+        <p>your id password {{db_query_one_user.password}}</p>
+        <p>your account is active {{db_query_one_user.active}}</p>
+        <p>your role is {{db_query_one_user.roles}}</p>
       </div>
     </div>
 
