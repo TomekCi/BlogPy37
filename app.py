@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, session, logging
-from flask_login import LoginManager
 from flask_security import login_required, SQLAlchemyUserDatastore, Security
 from models import db, User, Role
 from data import Articles
@@ -79,7 +78,6 @@ def login():
 
         db_query_one_user = User.query.filter_by(email=email).first()
 
-        print(db_query_one_user.id)
         if db_query_one_user is not None and db_query_one_user.password == password:
             return redirect('/profile/' + str(db_query_one_user.id))
 
@@ -106,7 +104,7 @@ def register():
         new_user = User(email=email, password=password)
         db.session.add(new_user)
         db.session.commit()
-        return redirect('/login')
+        return redirect('/login1')
     return render_template('register.html', form=form)
 
 
