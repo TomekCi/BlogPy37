@@ -12,6 +12,11 @@
         <h1>Hello</h1>
         <p>This is homepage of my blog.</p>
         <p>Please use button below to login ;)</p>
+          {% if current_user.is_authenticated %}
+            <p>User loged in.</p>
+          {% else %}
+            <p>User not logged!</p>
+          {% endif %}
         <p>
           <a class="btn btn-primary" href="/login1" role="button">Login »</a>
         </p>

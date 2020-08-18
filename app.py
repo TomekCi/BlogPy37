@@ -33,20 +33,6 @@ user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
 
-# @app.before_first_request
-# def create_user():
-#    db.create_all()
-#    user_datastore.create_user(email='matt@nobien.net', password='password')
-#    db.session.commit()
-
-
-# Views
-# @app.route('/')
-# @login_required
-# def home():
-#    return render_template('index.html')
-
-
 class RegisterForm(Form):
     # username = StringField('User name', [validators.Length(min=5, max=30)])
     email = StringField('E-mail address', [validators.Length(min=5, max=30)])
@@ -57,35 +43,8 @@ class RegisterForm(Form):
     confirm = PasswordField('Confirm Password')
 
 
-class LoginForm(Form):
-    email = StringField('Email address', [validators.Length(min=5, max=30)])
-    password = PasswordField('Password', [validators.Length(min=5, max=15)])
-
-
-'''
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-'''
-
-
-@app.route('/login1', methods=['GET', 'POST'])
-def login():
-    form = LoginForm(request.form)
-    if request.method == 'POST' and form.validate():
-        email = form.email.data
-        password = form.password.data
-
-        db_query_one_user = User.query.filter_by(email=email).first()
-
-        if db_query_one_user is not None and db_query_one_user.password == password:
-            return redirect('/profile/' + str(db_query_one_user.id))
-
-    return render_template('/login.html', form=form)
-
-
-@login_required
 @app.route('/profile/<id>')
+@login_required
 def profile(id):
     db_query_one_user = User.query.filter_by(id=id).first()
 
@@ -101,7 +60,7 @@ def register():
         password = form.password.data
         # passwordhash = User.set_password(form.password.data)
 
-        new_user = User(email=email, password=password)
+        new_user = User(email=email, password=password, active=True)
         db.session.add(new_user)
         db.session.commit()
         return redirect('/login1')
