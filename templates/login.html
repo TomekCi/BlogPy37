@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Login</title>
+{% endblock %}
+
+
+
+{% block body %}
+
+    <hr>
+    <h2>Login:</h2>
+        <form action="/login" method="POST">
+            UserName: <input class="form-control" type="text" name="username" id="username" value="enter name" aria-label="Login">
+            Password: <input class="form-control" type="text" name="password" id="password" value="enter password" aria-label="Password">
+            <br>
+            <input type="submit" value="Post">
+        </form>
+    <hr>
+
+{% endblock %}
