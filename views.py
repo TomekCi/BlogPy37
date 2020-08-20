@@ -1,17 +1,8 @@
-from flask import Flask, render_template, request, redirect
-from flask_login import LoginManager, login_user, login_required, logout_user
-from models import db, User
+from app import db, app, login_manager
+from flask import render_template, request, redirect
+from flask_login import login_user, login_required, logout_user
+from models import User
 from wtforms import Form, StringField, PasswordField, validators
-from config.config import Config
-
-
-app = Flask(__name__)
-
-login_manager = LoginManager()
-login_manager.init_app(app)
-
-db.init_app(app)
-app.config.from_object(Config)
 
 
 class RegisterForm(Form):
@@ -34,6 +25,7 @@ def login():
     form = LoginForm(request.form)
     if request.method == 'POST':
         db_query_one_user = User.query.filter_by(username=form.username.data).first()
+        print(db_query_one_user.verify_password(form.password.data))
         if db_query_one_user is not None and db_query_one_user.verify_password(form.password.data):
             login_user(db_query_one_user)
 
@@ -71,13 +63,10 @@ def logout():
 
 @app.route("/")
 def main():
+    print(app.config)
     return render_template('index.html')
 
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
-
-
-if __name__ == '__main__':
-    app.run()
