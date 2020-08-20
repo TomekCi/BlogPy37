@@ -48,11 +48,9 @@ class LoginForm(Form):
 def login():
     form = LoginForm(request.form)
     if request.method == 'POST':
-        username = form.username.data
-        password = form.password.data
-
-        db_query_one_user = User.query.filter_by(username=username).first()
-        if db_query_one_user is not None and db_query_one_user.password == password:
+        db_query_one_user = User.query.filter_by(username=form.username.data).first()
+        print(db_query_one_user.verify_password(form.password.data))
+        if db_query_one_user is not None and db_query_one_user.verify_password(form.password.data):
             login_user(db_query_one_user)
 
             return redirect('/profile/' + str(db_query_one_user.id))
@@ -71,11 +69,9 @@ def profile(id):
 def register():
     form = RegisterForm(request.form)
     if request.method == 'POST' and form.validate():
-        username = form.username.data
-        email = form.email.data
-        password = form.password.data
+        new_user = User(username=form.username.data, email=form.email.data,
+                        password_hash=User.hash_password(form.password.data))
 
-        new_user = User(username=username, email=email, password=password)
         db.session.add(new_user)
         db.session.commit()
         return redirect('/register')
