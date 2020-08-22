@@ -1,6 +1,7 @@
+import flask_login
 from flask import Flask, render_template, request, redirect
 from flask_login import LoginManager, login_user, login_required, logout_user
-from models import db, User
+from models import db, User, Post
 from wtforms import Form, StringField, PasswordField, validators
 from config.config import Config
 
@@ -34,6 +35,7 @@ def login():
     form = LoginForm(request.form)
     if request.method == 'POST':
         db_query_one_user = User.query.filter_by(username=form.username.data).first()
+        # db_query_one_user_email = User.query.filter_by(email=form.username.data).first()
         if db_query_one_user is not None and db_query_one_user.verify_password(form.password.data):
             login_user(db_query_one_user)
 
@@ -41,12 +43,19 @@ def login():
     return render_template('login.html')
 
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
 @app.route('/profile/<id>')
 @login_required
 def profile(id):
-    db_query_one_user = User.query.filter_by(id=id).first()
-
-    return render_template('profile.html', db_query_one_user=db_query_one_user)
+    if str(flask_login.current_user.id) == id:
+        db_query_one_user = User.query.filter_by(id=id).first()
+        return render_template('profile.html', db_query_one_user=db_query_one_user)
+    #else:
+    return redirect('/')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -69,14 +78,62 @@ def logout():
     return redirect('/')
 
 
-@app.route("/")
-def main():
-    return render_template('index.html')
-
-
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
+
+
+@app.route('/posts', methods=['GET', 'POST'])
+def posts():
+    if request.method == 'POST':
+        post_title = request.form['title']
+        post_content = request.form['content']
+        post_author = request.form['author']
+        new_post = Post(title=post_title, content=post_content, author=post_author)
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect('/posts')
+    elif request.method == 'GET':
+        all_posts = Post.query.order_by(Post.date_posted).all()
+        return render_template('posts.html', posts=all_posts)
+
+
+@app.route('/posts/delete/<int:id>')
+def delete(id):
+    post = Post.query.get_or_404(id)
+    db.session.delete(post)
+    db.session.commit()
+    return redirect('/posts')
+
+
+@app.route('/posts/edit/<int:id>', methods=['GET', 'POST'])
+def edit(id):
+
+    post = Post.query.get_or_404(id)
+
+    if request.method == 'POST':
+        post.title = request.form['title']
+        post.content = request.form['content']
+        post.author = request.form['author']
+        db.session.commit()
+        return redirect('/posts')
+    else:
+        return render_template('edit.html', post=post)
+
+
+@app.route('/posts/new', methods=['GET', 'POST'])
+def new_posts():
+    if request.method == 'POST':
+        post_title = request.form['title']
+        post_content = request.form['content']
+        post_author = request.form['author']
+        new_post = Post(title = post_title, content = post_content, author = post_author)
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect('/posts')
+    elif request.method == 'GET':
+        all_posts = Post.query.order_by(Post.date_posted).all()
+        return render_template('new_post.html', posts=all_posts)
 
 
 if __name__ == '__main__':

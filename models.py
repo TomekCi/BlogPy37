@@ -38,6 +38,7 @@ class User(BaseModel, UserMixin, db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
     register_date = db.Column(db.DateTime, server_default=db.func.now())
 
+
     @staticmethod
     def hash_password(password):
         return hash_alg.encrypt(password)
@@ -45,3 +46,14 @@ class User(BaseModel, UserMixin, db.Model):
     def verify_password(self, pwd_hash):
         return hash_alg.verify(pwd_hash, self.password_hash)
 
+
+class Post(BaseModel, db.Model):
+    __tablename__ = 'post'
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    title = db.Column(db.String(100), nullable=False)
+    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    content = db.Column(db.Text, nullable=True)
+    author = db.Column(db.String, nullable=False)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
