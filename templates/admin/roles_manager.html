@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Users</title>
+{% endblock %}
+
+
+{% block body %}
+<br>
+    <br>
+        {% if roles|length  %}
+            <table style="width:100%">
+            {% for role in roles %}
+            <tr>
+                <th>{{ role.id }}</th>
+                <th>{{ role.name }}</th>
+                <th><a class="btn btn-danger" name="delete_role" href="/roles/delete/{{role.id}}">Delete</a></th>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <h2>There is no roles to manage :(</h2>
+            <form action="/roles" method="POST">
+                <input type="submit" value="Add roles" class="=btn btn-success">
+            </form>
+        {% endif %}
+
+{% endblock %}

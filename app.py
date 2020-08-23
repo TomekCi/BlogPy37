@@ -1,7 +1,7 @@
 import flask_login
 from flask import Flask, render_template, request, redirect
 from flask_login import LoginManager, login_user, login_required, logout_user
-from models import db, User, Post
+from models import db, User, Post, Role, UserRoles
 from wtforms import Form, StringField, PasswordField, validators
 from config.config import Config
 
@@ -83,6 +83,42 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 
+@app.route('/roles', methods=['GET', 'POST'])
+def roles_manager():
+    if request.method == 'POST':
+        roles = ['Admin', 'Standard', 'Author']
+        for role in roles:
+            new_post = Role(name=role)
+            db.session.add(new_post)
+        db.session.commit()
+        return redirect('/roles')
+    elif request.method == 'GET':
+        all_roles = Role.query.order_by(Role.name).all()
+        return render_template('admin/roles_manager.html', roles=all_roles)
+
+
+@app.route('/roles/delete/<int:id>')
+def delete_role(id):
+    role = Role.query.get_or_404(id)
+    db.session.delete(role)
+    db.session.commit()
+    return redirect('/roles')
+
+
+@app.route('/users', methods=['GET', 'POST'])
+def users_manager():
+    all_users = User.query.order_by(User.username).all()
+    return render_template('admin/users_manager.html', users=all_users)
+
+
+@app.route('/users/delete/<int:id>')
+def delete_user(id):
+    user = User.query.get_or_404(id)
+    db.session.delete(user)
+    db.session.commit()
+    return redirect('/users')
+
+
 @app.route('/posts', methods=['GET', 'POST'])
 def posts():
     if request.method == 'POST':
@@ -121,19 +157,9 @@ def edit(id):
         return render_template('edit.html', post=post)
 
 
-@app.route('/posts/new', methods=['GET', 'POST'])
+@app.route('/posts/new', methods=['GET'])
 def new_posts():
-    if request.method == 'POST':
-        post_title = request.form['title']
-        post_content = request.form['content']
-        post_author = request.form['author']
-        new_post = Post(title = post_title, content = post_content, author = post_author)
-        db.session.add(new_post)
-        db.session.commit()
-        return redirect('/posts')
-    elif request.method == 'GET':
-        all_posts = Post.query.order_by(Post.date_posted).all()
-        return render_template('new_post.html', posts=all_posts)
+    return render_template('new_post.html')
 
 
 if __name__ == '__main__':

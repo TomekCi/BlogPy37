@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Users</title>
+{% endblock %}
+
+
+{% block body %}
+<br>
+    <br>
+
+        <br>
+        {% if users|length  %}
+            <table style="width:100%">
+            {% for user in users %}
+            <tr>
+                <th>{{ user.id }}</th>
+                <th>{{ user.username }}</th>
+                <th>{{ user.email }}</th>
+                <th><a class="btn btn-danger" name="delete_user" href="/users/delete/{{user.id}}">Delete</a></th>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <h2>There is no users to manage :(</h2>
+        {% endif %}
+
+{% endblock %}

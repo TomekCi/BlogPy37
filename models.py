@@ -32,12 +32,13 @@ class BaseModel(db.Model):
 class User(BaseModel, UserMixin, db.Model):
     __tablename__ = 'user'
 
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
     username = db.Column(db.String(64), nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     register_date = db.Column(db.DateTime, server_default=db.func.now())
 
+    roles = db.relationship('Role', secondary='user_roles')
 
     @staticmethod
     def hash_password(password):
@@ -47,10 +48,23 @@ class User(BaseModel, UserMixin, db.Model):
         return hash_alg.verify(pwd_hash, self.password_hash)
 
 
+class Role(BaseModel, db.Model):
+    __tablename__ = 'roles'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+
+
+class UserRoles(BaseModel, db.Model):
+    __tablename__ = 'user_roles'
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
+    role_id = db.Column(db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE'))
+
+
 class Post(BaseModel, db.Model):
     __tablename__ = 'post'
 
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     content = db.Column(db.Text, nullable=True)
