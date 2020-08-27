@@ -8,20 +8,21 @@
 {% block body %}
 <br>
     <br>
-
-        <br>
-        {% if users|length  %}
-            <table style="width:100%">
-            {% for user in users %}
-            <tr>
-                <th>{{ user.id }}</th>
-                <th>{{ user.username }}</th>
-                <th>{{ user.email }}</th>
-                <th><a class="btn btn-danger" name="delete_user" href="/users/delete/{{user.id}}">Delete</a></th>
-            </tr>
-            {% endfor %}
-        {% else %}
-            <h2>There is no users to manage :(</h2>
-        {% endif %}
-
+    {% if users|length %}
+        {% for user in users %}
+            <th>{{ user.id }}</th>
+            <th>{{ user.username }}</th>
+            <th>{{ user.email }}</th>
+            <th>{{ user.register_date }}</th>
+            <th><a class="btn btn-danger" href="/users/delete/{{user.id}}">Delete</a></th>
+            {% if roles|length %}
+            <th>dziala</th>
+                {% for role in roles %}
+                    <th><a class="btn btn-primary" href="/users/add_role/{{user.id}}/{{role.id}}">{{role.name}}</a></th>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <p>There is no users to manage :(</p>
+    {% endif %}
 {% endblock %}
