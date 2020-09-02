@@ -2,25 +2,25 @@ from app import app, login_manager
 import flask_login
 from flask import render_template, request, redirect
 from flask_login import login_user, login_required, logout_user
-from models import db, User, Post, Role, UserRoles
+from models import db, Users, Posts, Roles
 from wtforms import Form, StringField, PasswordField, validators
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(user_id)
+    return Users.get(user_id)
 
 
 
 
 
-@app.before_first_request
+# @app.before_first_request
 def create_roles():
     roles = ['Admin', 'Standard', 'Author']
-    all_roles = Role.query.order_by(Role.name).all()
+    all_roles = Roles.query.order_by(Roles.name).all()
     if not all_roles:
         for role in roles:
-            new_post = Role(name=role)
+            new_post = Roles(name=role)
             db.session.add(new_post)
             db.session.commit()
 
@@ -54,7 +54,7 @@ class LoginForm(Form):
 def login():
     form = LoginForm(request.form)
     if request.method == 'POST':
-        db_query_one_user = User.query.filter_by(username=form.username.data).first()
+        db_query_one_user = Users.query.filter_by(username=form.username.data).first()
         # db_query_one_user_email = User.query.filter_by(email=form.username.data).first()
         if db_query_one_user is not None and db_query_one_user.verify_password(form.password.data):
             login_user(db_query_one_user)
@@ -72,7 +72,7 @@ def index():
 @login_required
 def profile(id):
     if str(flask_login.current_user.id) == id:
-        db_query_one_user = User.query.filter_by(id=id).first()
+        db_query_one_user = Users.query.filter_by(id=id).first()
         return render_template('profile.html', db_query_one_user=db_query_one_user)
     #else:
     return redirect('/')
@@ -82,8 +82,8 @@ def profile(id):
 def register():
     form = RegisterForm(request.form)
     if request.method == 'POST' and form.validate():
-        new_user = User(username=form.username.data, email=form.email.data,
-                        password_hash=User.hash_password(form.password.data))
+        new_user = Users(username=form.username.data, email=form.email.data,
+                        password_hash=Users.hash_password(form.password.data))
 
         db.session.add(new_user)
         db.session.commit()
@@ -100,11 +100,11 @@ def logout():
 
 @app.route('/roles', methods=['GET', 'POST'])
 def roles_manager():
-    all_roles = Role.query.order_by(Role.name).all()
+    all_roles = Roles.query.order_by(Roles.name).all()
     if request.method == 'POST':
         # roles = ['Admin', 'Standard', 'Author']
         for role in all_roles:
-            new_post = Role(name=role.name)
+            new_post = Roles(name=role.name)
             db.session.add(new_post)
             db.session.commit()
 
@@ -115,7 +115,7 @@ def roles_manager():
 
 @app.route('/roles/delete/<int:id>')
 def delete_role(id):
-    role = Role.query.get_or_404(id)
+    role = Roles.query.get_or_404(id)
     db.session.delete(role)
     db.session.commit()
     return redirect('/roles')
@@ -123,13 +123,13 @@ def delete_role(id):
 
 @app.route('/users', methods=['GET'])
 def users_manager():
-    user_db_query_all = User.query.order_by(User.username).all()
-    role_db_query_all = Role.query.order_by(Role.name).all()
-    userroles_db_query_all = UserRoles.query.order_by(UserRoles.user_id).all()
+    user_db_query_all = Users.query.order_by(Users.username).all()
+    role_db_query_all = Roles.query.order_by(Roles.name).all()
+    #userroles_db_query_all = UserRoles.query.order_by(UserRoles.user_id).all()
     return render_template('admin/users_manager.html', users=user_db_query_all,
-                           roles=role_db_query_all, userroles=userroles_db_query_all)
+                           roles=role_db_query_all)
 
-
+'''
 @app.route('/users/add_role/<user>/<role>')
 def add_userroles(user, role):
     new_user_role = UserRoles(user_id=user, role_id=role)
@@ -144,11 +144,11 @@ def delete_userroles(user):
     db.session.delete(delete_user_role)
     db.session.commit()
     return redirect('/users')
-
+'''
 
 @app.route('/users/delete/<int:id>')
 def delete_user(id):
-    user = User.query.get_or_404(id)
+    user = Users.query.get_or_404(id)
     db.session.delete(user)
     db.session.commit()
     return redirect('/users')
@@ -160,18 +160,18 @@ def posts():
         post_title = request.form['title']
         post_content = request.form['content']
         post_author = request.form['author']
-        new_post = Post(title=post_title, content=post_content, author=post_author)
+        new_post = Posts(title=post_title, content=post_content, author=post_author)
         db.session.add(new_post)
         db.session.commit()
         return redirect('/posts')
     elif request.method == 'GET':
-        all_posts = Post.query.order_by(Post.date_posted).all()
+        all_posts = Posts.query.order_by(Posts.date_posted).all()
         return render_template('posts.html', posts=all_posts)
 
 
 @app.route('/posts/delete/<int:id>')
 def delete(id):
-    post = Post.query.get_or_404(id)
+    post = Posts.query.get_or_404(id)
     db.session.delete(post)
     db.session.commit()
     return redirect('/posts')
@@ -180,7 +180,7 @@ def delete(id):
 @app.route('/posts/edit/<int:id>', methods=['GET', 'POST'])
 def edit(id):
 
-    post = Post.query.get_or_404(id)
+    post = Posts.query.get_or_404(id)
 
     if request.method == 'POST':
         post.title = request.form['title']

@@ -6,7 +6,7 @@ class Config(object):
     POSTGRES = {
         'user': 'postgres',
         'pw': 'dupa1',
-        'db': 'flasklogin',
+        'db': 'flasklogin2',
         'host': 'localhost',
         'port': '5432',
     }

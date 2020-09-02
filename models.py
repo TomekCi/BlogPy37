@@ -28,16 +28,21 @@ class BaseModel(db.Model):
             for column, value in self._to_dict().items()
         }"""
 
+userroles = db.Table('userroles',
+                     db.Column('user_id', db.Integer, db.ForeignKey('users.user_id')),
+                     db.Column('role_id', db.Integer, db.ForeignKey('roles.role_id'))
+)
 
-class User(BaseModel, UserMixin, db.Model):
-    __tablename__ = 'user'
 
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
+class Users(BaseModel, UserMixin, db.Model):
+    __tablename__ = 'users'
+    user_id = db.Column(db.Integer, primary_key=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     username = db.Column(db.String(64), nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     register_date = db.Column(db.DateTime, server_default=db.func.now())
-    roles = db.relationship('Role', secondary='user_roles')
+    # roles = db.relationship('Roles', secondary='userroles')
+    role_assignations = db.relationship('Roles', secondary=userroles, backref=db.backref('assignations', lazy='dynamic'))
 
     @staticmethod
     def hash_password(password):
@@ -47,26 +52,16 @@ class User(BaseModel, UserMixin, db.Model):
         return hash_alg.verify(pwd_hash, self.password_hash)
 
 
-class Role(db.Model):
+class Roles(db.Model):
     __tablename__ = 'roles'
-    id = db.Column(db.Integer(), primary_key=True)
+    role_id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(50), unique=True)
 
 
-class UserRoles(db.Model):
-    __tablename__ = 'user_roles'
-    id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
-    role_id = db.Column(db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE'))
-
-
-class Post(BaseModel, db.Model):
+class Posts(BaseModel, db.Model):
     __tablename__ = 'post'
-
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    post_id = db.Column(db.Integer, primary_key=True, nullable=False)
     title = db.Column(db.String(100), nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     content = db.Column(db.Text, nullable=True)
     author = db.Column(db.String, nullable=False)
-
-    #user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
