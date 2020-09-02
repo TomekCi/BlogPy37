@@ -11,6 +11,30 @@ def load_user(user_id):
     return User.get(user_id)
 
 
+
+
+
+@app.before_first_request
+def create_roles():
+    roles = ['Admin', 'Standard', 'Author']
+    all_roles = Role.query.order_by(Role.name).all()
+    if not all_roles:
+        for role in roles:
+            new_post = Role(name=role)
+            db.session.add(new_post)
+            db.session.commit()
+
+
+
+
+
+    '''    for role in roles:
+            if
+            new_post = Role(name=role)
+            db.session.add(new_post)
+            db.session.commit()
+'''
+
 class RegisterForm(Form):
     username = StringField('username', [validators.Length(min=5, max=30)])
     email = StringField('email', [validators.Length(min=5, max=30)])
@@ -42,14 +66,6 @@ def login():
 @app.route('/')
 def index():
     return render_template('index.html')
-
-
-@app.route('/users/add_role/<user>/<role>')
-def add_roles(user, role):
-    new_user_role = UserRoles(user_id=user, role_id=role)
-    db.session.add(new_user_role)
-    db.session.commit()
-    return redirect('/users')
 
 
 @app.route('/profile/<id>')
@@ -84,15 +100,16 @@ def logout():
 
 @app.route('/roles', methods=['GET', 'POST'])
 def roles_manager():
+    all_roles = Role.query.order_by(Role.name).all()
     if request.method == 'POST':
-        roles = ['Admin', 'Standard', 'Author']
-        for role in roles:
-            new_post = Role(name=role)
+        # roles = ['Admin', 'Standard', 'Author']
+        for role in all_roles:
+            new_post = Role(name=role.name)
             db.session.add(new_post)
-        db.session.commit()
+            db.session.commit()
+
         return redirect('/roles')
     elif request.method == 'GET':
-        all_roles = Role.query.order_by(Role.name).all()
         return render_template('admin/roles_manager.html', roles=all_roles)
 
 
@@ -108,7 +125,25 @@ def delete_role(id):
 def users_manager():
     user_db_query_all = User.query.order_by(User.username).all()
     role_db_query_all = Role.query.order_by(Role.name).all()
-    return render_template('admin/users_manager.html', users=user_db_query_all, roles=role_db_query_all)
+    userroles_db_query_all = UserRoles.query.order_by(UserRoles.user_id).all()
+    return render_template('admin/users_manager.html', users=user_db_query_all,
+                           roles=role_db_query_all, userroles=userroles_db_query_all)
+
+
+@app.route('/users/add_role/<user>/<role>')
+def add_userroles(user, role):
+    new_user_role = UserRoles(user_id=user, role_id=role)
+    db.session.add(new_user_role)
+    db.session.commit()
+    return redirect('/users')
+
+
+@app.route('/users/delete_role/<user>')
+def delete_userroles(user):
+    delete_user_role = UserRoles.query.get_or_404(user)
+    db.session.delete(delete_user_role)
+    db.session.commit()
+    return redirect('/users')
 
 
 @app.route('/users/delete/<int:id>')

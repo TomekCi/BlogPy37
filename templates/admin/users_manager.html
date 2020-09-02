@@ -15,12 +15,29 @@
             <th>{{ user.email }}</th>
             <th>{{ user.register_date }}</th>
             <th><a class="btn btn-danger" href="/users/delete/{{user.id}}">Delete</a></th>
+
             {% if roles|length %}
-            <th>dziala</th>
+            <br>
                 {% for role in roles %}
-                    <th><a class="btn btn-primary" href="/users/add_role/{{user.id}}/{{role.id}}">{{role.name}}</a></th>
+                    <th><a class="btn btn-success" href="/users/add_role/{{user.id}}/{{role.id}}">{{role.name}}</a>
+
+                    {% for userrole in userroles %}
+                        {% if userrole.user_id == user.id and userrole.role_id == role.id %}
+                            <th><a class="btn btn-danger" href="/users/delete_role/{{userrole.id}}">delete roles</a></th></th>
+
+                        {% endif %}
+                    {% endfor %}
                 {% endfor %}
+                {% for userrole in userroles %}
+                    <p>{{userrole.id}} {{userrole.user_id}} {{userrole.role_id}}</p>
+                {% endfor %}
+            {% else %}
+                <th>ni ma</th>
             {% endif %}
+
+
+
+
         {% endfor %}
     {% else %}
         <p>There is no users to manage :(</p>
