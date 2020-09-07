@@ -7,14 +7,11 @@ from wtforms import Form, StringField, PasswordField, validators
 
 
 @login_manager.user_loader
-def load_user(user_id):
-    return Users.get(user_id)
+def load_user(id):
+    return Users.query.get(id)
 
 
-
-
-
-# @app.before_first_request
+@app.before_first_request
 def create_roles():
     roles = ['Admin', 'Standard', 'Author']
     all_roles = Roles.query.order_by(Roles.name).all()
@@ -23,9 +20,6 @@ def create_roles():
             new_post = Roles(name=role)
             db.session.add(new_post)
             db.session.commit()
-
-
-
 
 
     '''    for role in roles:
@@ -69,7 +63,6 @@ def index():
 
 
 @app.route('/profile/<id>')
-@login_required
 def profile(id):
     if str(flask_login.current_user.id) == id:
         db_query_one_user = Users.query.filter_by(id=id).first()
@@ -99,6 +92,7 @@ def logout():
 
 
 @app.route('/roles', methods=['GET', 'POST'])
+@login_required
 def roles_manager():
     all_roles = Roles.query.order_by(Roles.name).all()
     if request.method == 'POST':
@@ -114,6 +108,7 @@ def roles_manager():
 
 
 @app.route('/roles/delete/<int:id>')
+@login_required
 def delete_role(id):
     role = Roles.query.get_or_404(id)
     db.session.delete(role)
@@ -122,6 +117,7 @@ def delete_role(id):
 
 
 @app.route('/users', methods=['GET'])
+@login_required
 def users_manager():
     user_db_query_all = Users.query.order_by(Users.username).all()
     role_db_query_all = Roles.query.order_by(Roles.name).all()
@@ -129,15 +125,16 @@ def users_manager():
     return render_template('admin/users_manager.html', users=user_db_query_all,
                            roles=role_db_query_all)
 
-'''
+
+
 @app.route('/users/add_role/<user>/<role>')
 def add_userroles(user, role):
-    new_user_role = UserRoles(user_id=user, role_id=role)
-    db.session.add(new_user_role)
+    role_query_one = Users.query.get(role)
+    role_query_one.role_assignations.append(Users.query.get(user))
     db.session.commit()
     return redirect('/users')
 
-
+'''
 @app.route('/users/delete_role/<user>')
 def delete_userroles(user):
     delete_user_role = UserRoles.query.get_or_404(user)
@@ -146,7 +143,9 @@ def delete_userroles(user):
     return redirect('/users')
 '''
 
+
 @app.route('/users/delete/<int:id>')
+@login_required
 def delete_user(id):
     user = Users.query.get_or_404(id)
     db.session.delete(user)
@@ -170,6 +169,7 @@ def posts():
 
 
 @app.route('/posts/delete/<int:id>')
+@login_required
 def delete(id):
     post = Posts.query.get_or_404(id)
     db.session.delete(post)
@@ -178,6 +178,7 @@ def delete(id):
 
 
 @app.route('/posts/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
 def edit(id):
 
     post = Posts.query.get_or_404(id)
@@ -193,6 +194,7 @@ def edit(id):
 
 
 @app.route('/posts/new', methods=['GET'])
+@login_required
 def new_posts():
     return render_template('new_post.html')
 
