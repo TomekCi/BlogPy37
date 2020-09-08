@@ -36,7 +36,7 @@ userroles = db.Table('userroles', Base.metadata,
 )
 
 
-class Users(BaseModel, UserMixin, db.Model):
+class Users(Base, BaseModel, db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
@@ -44,7 +44,7 @@ class Users(BaseModel, UserMixin, db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
     register_date = db.Column(db.DateTime, server_default=db.func.now())
     # roles = db.relationship('Roles', secondary='userroles')
-    role_assignations = db.relationship('Roles', secondary=userroles, backref=db.backref("users", lazy='dynamic'))
+    role_assignations = db.relationship('Roles', secondary=userroles, backref=db.backref("assignations", lazy='dynamic'))
 
     @staticmethod
     def hash_password(password):
@@ -54,13 +54,13 @@ class Users(BaseModel, UserMixin, db.Model):
         return hash_alg.verify(pwd_hash, self.password_hash)
 
 
-class Roles(db.Model):
+class Roles(Base, BaseModel, db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(50), unique=True)
 
 
-class Posts(BaseModel, db.Model):
+class Posts(Base, BaseModel, db.Model):
     __tablename__ = 'posts'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     title = db.Column(db.String(100), nullable=False)
