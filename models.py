@@ -46,6 +46,14 @@ class User(BaseModel, UserMixin, db.Model):
     def verify_password(self, pwd_hash):
         return hash_alg.verify(pwd_hash, self.password_hash)
 
+    def get_role(self):
+        userroles = UserRoles.query.filter(UserRoles.user_id == self.id).all()
+        uroles=[]
+        for ur in userroles:
+            userroles = Role.query.filter(Role.id == ur.role_id).first()
+            uroles.append(userroles.name)
+        return uroles
+
 
 class Role(db.Model):
     __tablename__ = 'roles'

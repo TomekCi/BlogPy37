@@ -5,13 +5,30 @@ from flask_login import login_user, login_required, logout_user
 from models import db, User, Post, Role, UserRoles
 from wtforms import Form, StringField, PasswordField, validators
 
+from functools import wraps
+
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(user_id)
+    return User.query.get(user_id)
 
 
+'''
+def role_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if f in User.get_role(flask_login.current_user)
+        UserRoles.query.get(flask_login.current_user.id)
+        if
 
+        flask_login.current_user.id
+
+        user_db_query_all = User.query.order_by(User.username).all()
+        role_db_query_all = Role.query.order_by(Role.name).all()
+        userroles_db_query_all = UserRoles.query.order_by(UserRoles.user_id).all()
+        return render_template('admin/users_manager.html', users=user_db_query_all,
+                        roles=role_db_query_all, userroles=userroles_db_query_all)
+'''
 
 
 @app.before_first_request
@@ -24,16 +41,6 @@ def create_roles():
             db.session.add(new_post)
             db.session.commit()
 
-
-
-
-
-    '''    for role in roles:
-            if
-            new_post = Role(name=role)
-            db.session.add(new_post)
-            db.session.commit()
-'''
 
 class RegisterForm(Form):
     username = StringField('username', [validators.Length(min=5, max=30)])
@@ -123,6 +130,15 @@ def delete_role(id):
 
 @app.route('/users', methods=['GET'])
 def users_manager():
+    # print(User.get_role(flask_login.current_user))
+
+    if 'Admin' in User.get_role(flask_login.current_user):
+        print('Admin')
+    if 'Author' in User.get_role(flask_login.current_user):
+        print('Author')
+    if 'Standard' in User.get_role(flask_login.current_user):
+        print('Standard')
+
     user_db_query_all = User.query.order_by(User.username).all()
     role_db_query_all = Role.query.order_by(Role.name).all()
     userroles_db_query_all = UserRoles.query.order_by(UserRoles.user_id).all()
